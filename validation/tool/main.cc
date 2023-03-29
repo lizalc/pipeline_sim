@@ -52,6 +52,9 @@ int main(int argc, char *argv[]) {
 	   fprintf(stderr, "Usage: scope <input-file> <output-file>\n");
 	   exit(-1);
 	}
+	else if (false) {
+	   ++argc;
+	}
 	else {
 	   fp_in = fopen(argv[1], "r");
 	   if (!fp_in) {
@@ -86,6 +89,7 @@ int main(int argc, char *argv[]) {
 	fclose(fp_in);
 	fclose(fp_out);
 
+	while(true);
 
 	// Create an html web page for viewing output file with scroll bars.
 	//create_html(argv[2]);
