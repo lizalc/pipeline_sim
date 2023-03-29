@@ -13,7 +13,7 @@ public:
 	            int srcReg1, int srcReg2);
 
 	// Sets the cycle a stage started
-	void initCycle(PipelineStage stage, unsigned long cycle);
+	void initCycle(PipelineStage stage, int cycle);
 	// Increments current stage cycle count.
 	void updateCycle(PipelineStage stage);
 
@@ -27,6 +27,7 @@ public:
 	int src1() const;
 	int src2() const;
 
+	int op() const;
 	void execute();
 	int executeCount() const;
 

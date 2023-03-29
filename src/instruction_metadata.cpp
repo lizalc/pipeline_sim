@@ -4,6 +4,7 @@
 
 #include "instruction_metadata.h"
 #include "pipeline_names.h"
+#include <iostream>
 #include <ostream>
 
 InstructionMetadata::InstructionMetadata(int sequenceNum, int opType, int destReg,
@@ -14,21 +15,24 @@ InstructionMetadata::InstructionMetadata(int sequenceNum, int opType, int destRe
       srcReg1{srcReg1},
       srcReg2{srcReg2},
       stageCycles{
-          {PipelineStage::Fetch, std::make_pair(0, 0)},
-          {PipelineStage::Decode, std::make_pair(0, 0)},
-          {PipelineStage::Rename, std::make_pair(0, 0)},
-          {PipelineStage::RegisterRead, std::make_pair(0, 0)},
-          {PipelineStage::Dispatch, std::make_pair(0, 0)},
-          {PipelineStage::Issue, std::make_pair(0, 0)},
-          {PipelineStage::Execute, std::make_pair(0, 0)},
-          {PipelineStage::Writeback, std::make_pair(0, 0)},
-          {PipelineStage::Retire, std::make_pair(0, 0)},
+          {PipelineStage::Fetch, std::make_pair(-1, 0)},
+          {PipelineStage::Decode, std::make_pair(-1, 0)},
+          {PipelineStage::Rename, std::make_pair(-1, 0)},
+          {PipelineStage::RegisterRead, std::make_pair(-1, 0)},
+          {PipelineStage::Dispatch, std::make_pair(-1, 0)},
+          {PipelineStage::Issue, std::make_pair(-1, 0)},
+          {PipelineStage::Execute, std::make_pair(-1, 0)},
+          {PipelineStage::Writeback, std::make_pair(-1, 0)},
+          {PipelineStage::Retire, std::make_pair(-1, 0)},
       }
 {}
 
-void InstructionMetadata::initCycle(PipelineStage stage, unsigned long cycle)
+void InstructionMetadata::initCycle(PipelineStage stage, int cycle)
 {
-	stageCycles[stage].first = cycle;
+	// Only update if start cycle hasn't been updated yet.
+	if (stageCycles[stage].first == -1) {
+		stageCycles[stage].first = cycle;
+	}
 }
 
 void InstructionMetadata::updateCycle(PipelineStage stage)
@@ -49,6 +53,11 @@ int InstructionMetadata::src1() const
 int InstructionMetadata::src2() const
 {
 	return srcReg2;
+}
+
+int InstructionMetadata::op() const
+{
+	return opType;
 }
 
 std::pair<int, int> InstructionMetadata::operator[](PipelineStage stage) const

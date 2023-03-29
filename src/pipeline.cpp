@@ -262,7 +262,61 @@ void Pipeline::issue()
 }
 
 void Pipeline::execute()
-{}
+{
+	if (!registers[PipelineRegister::execute_list]->empty()) {
+		// XXX -> Double check correct execution cycles (increment execution
+		//        counters then check for finish, or check for finish then
+		//        increment? Instructions make it seem like the former, just be sure)
+		// Keep a vector of completed instructions for removal at the end
+		std::vector<std::shared_ptr<Instruction>> completeInstructions;
+
+		for (int i = 0; i <= registers[PipelineRegister::execute_list]->tailIndex();
+		     ++i) {
+			auto instruction = registers[PipelineRegister::execute_list]->at(i);
+			instruction->initCycle(PipelineStage::Execute, overallCycle);
+			instruction->updateCycle(PipelineStage::Execute);
+			instruction->execute();
+
+			switch (instruction->op()) {
+			case 0:
+				if (instruction->executeCount() == 1) {
+					instruction->markComplete();
+				}
+				break;
+
+			case 1:
+				if (instruction->executeCount() == 2) {
+					instruction->markComplete();
+				}
+				break;
+
+			case 2:
+				if (instruction->executeCount() == 5) {
+					instruction->markComplete();
+				}
+				break;
+
+			default:
+				break;
+			}
+
+			if (instruction->isComplete()) {
+				//				registers[PipelineRegister::ROB]
+				//				    ->at(instruction->dest())
+				//				    ->markComplete();
+
+				// XXX -> May have too many instructions completing at once with
+				//        the way code is now. Not 100% sure if so or how to handle.
+				completeInstructions.push_back(instruction);
+				registers[PipelineRegister::WB]->add(instruction);
+			}
+		}
+
+		for (auto &i : completeInstructions) {
+			registers[PipelineRegister::execute_list]->remove(i);
+		}
+	}
+}
 
 void Pipeline::writeback()
 {}

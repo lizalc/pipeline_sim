@@ -40,7 +40,7 @@ private:
 	// Pipeline width
 	unsigned long width;
 	// Current overall cycle
-	unsigned long overallCycle;
+	int overallCycle;
 	// For getting the current instruction from the instruction cache
 	size_t currentIndex;
 

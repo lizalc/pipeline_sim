@@ -18,7 +18,7 @@ Instruction::Instruction(unsigned long pc, int sequenceNum, int opType, int dest
       src2Ready{false}
 {}
 
-void Instruction::initCycle(PipelineStage stage, unsigned long cycle)
+void Instruction::initCycle(PipelineStage stage, int cycle)
 {
 	data.initCycle(stage, cycle);
 }
@@ -71,6 +71,11 @@ int Instruction::src1() const
 int Instruction::src2() const
 {
 	return src2RobIndex;
+}
+
+int Instruction::op() const
+{
+	return data.op();
 }
 
 void Instruction::execute()
