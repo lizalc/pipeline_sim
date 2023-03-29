@@ -11,7 +11,7 @@
 
 class Pipeline {
 public:
-	Pipeline(unsigned long robSize, unsigned long IQSize, unsigned long width);
+	Pipeline(int robSize, int IQSize, int width);
 
 	void fetch();
 	void decode();
@@ -38,7 +38,7 @@ private:
 	std::unordered_map<int, int> renameMapTable;
 
 	// Pipeline width
-	unsigned long width;
+	int width;
 	// Current overall cycle
 	int overallCycle;
 	// For getting the current instruction from the instruction cache

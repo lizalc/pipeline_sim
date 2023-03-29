@@ -3,17 +3,18 @@
 
 #include "pipeline_register.h"
 #include <algorithm>
+#include <iostream>
 
-RegisterBase::RegisterBase(unsigned long width) : width{width}
+RegisterBase::RegisterBase(int width) : width{width}
 {}
 
-InOrderRegister::InOrderRegister(unsigned long width) : RegisterBase{width}
+InOrderRegister::InOrderRegister(int width) : RegisterBase{width}
 {}
 
-unsigned long InOrderRegister::add(std::shared_ptr<Instruction> instruction)
+int InOrderRegister::add(std::shared_ptr<Instruction> instruction)
 {
 	instructions.push_back(instruction);
-	return instructions.size() - 1;
+	return static_cast<int>(instructions.size()) - 1;
 }
 
 std::shared_ptr<Instruction> InOrderRegister::pop()
@@ -35,9 +36,15 @@ void InOrderRegister::remove(std::shared_ptr<Instruction> instruction)
 	    instructions.end());
 }
 
+void InOrderRegister::remove(int)
+{
+	std::cout << "Wrong remove called\n";
+	std::exit(EXIT_FAILURE);
+}
+
 bool InOrderRegister::ready() const
 {
-	return instructions.size() < width;
+	return static_cast<int>(instructions.size()) < width;
 }
 
 bool InOrderRegister::empty() const
@@ -50,63 +57,31 @@ int InOrderRegister::tailIndex() const
 	return static_cast<int>(instructions.size() - 1);
 }
 
-ReorderBuffer::ReorderBuffer(unsigned long robSize, unsigned long pipelineWidth)
-    : InOrderRegister{robSize}, pipelineWidth{pipelineWidth}
+ReorderBuffer::ReorderBuffer(int robSize, int pipelineWidth)
+    : InOrderRegister{robSize}, pipelineWidth{pipelineWidth}, head{0}
 {}
+
+void ReorderBuffer::remove(int)
+{
+	++head;
+}
 
 bool ReorderBuffer::ready() const
 {
 	// Check that there is enough space left in ROB for incoming instructions.
-	return pipelineWidth < (width - instructions.size());
+	return (tailIndex() - head) < width;
 }
 
-// ExecuteList::ExecuteList(unsigned long width) : InOrderRegister{width}
-//{}
-//
-// bool ExecuteList::ready() const
-//{
-//
-//}
+bool ReorderBuffer::empty() const
+{
+	return head == tailIndex();
+}
 
-OutOfOrderRegister::OutOfOrderRegister(unsigned long width) : RegisterBase{width}
+IssueQueue::IssueQueue(int IQSize, int width)
+    : InOrderRegister{IQSize}, pipelineWidth{width}
 {}
 
-unsigned long OutOfOrderRegister::add(std::shared_ptr<Instruction> instruction)
+bool IssueQueue::ready() const
 {
-	instructions.emplace_back(instruction);
-	return instructions.size() - 1;
-}
-
-std::shared_ptr<Instruction> OutOfOrderRegister::pop()
-{
-	// Will need erase-remove idiom and to figure out how to actually work
-	// this.
-	return instructions.front();
-}
-
-std::shared_ptr<Instruction> OutOfOrderRegister::at(int index)
-{
-	return instructions.at(static_cast<size_t>(index));
-}
-
-void OutOfOrderRegister::remove(std::shared_ptr<Instruction> instruction)
-{
-	instructions.erase(
-	    std::remove(instructions.begin(), instructions.end(), instruction),
-	    instructions.end());
-}
-
-bool OutOfOrderRegister::ready() const
-{
-	return instructions.size() < width;
-}
-
-bool OutOfOrderRegister::empty() const
-{
-	return instructions.empty();
-}
-
-int OutOfOrderRegister::tailIndex() const
-{
-	return static_cast<int>(instructions.size() - 1);
+	return pipelineWidth < (width - static_cast<int>(instructions.size()));
 }

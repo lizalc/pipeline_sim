@@ -11,8 +11,8 @@
 #include <string>
 #include <vector>
 
-Simulator::Simulator(const unsigned long robSize, const unsigned long IQSize,
-                     const unsigned long width, const std::string &traceFile)
+Simulator::Simulator(const int robSize, const int IQSize, const int width,
+                     const std::string &traceFile)
     : pipeline{robSize, IQSize, width}, traceFile{traceFile}
 {}
 

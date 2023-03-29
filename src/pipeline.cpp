@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 
-Pipeline::Pipeline(unsigned long robSize, unsigned long IQSize, unsigned long width)
+Pipeline::Pipeline(int robSize, int IQSize, int width)
     : width{width}, overallCycle{0}, currentIndex{0}
 {
 	for (int i = 0; i < 67; ++i) {
@@ -28,10 +28,10 @@ Pipeline::Pipeline(unsigned long robSize, unsigned long IQSize, unsigned long wi
 	    std::unique_ptr<RegisterBase>(new IssueQueue(IQSize, width));
 
 	registers[PipelineRegister::execute_list] =
-	    std::unique_ptr<RegisterBase>(new OutOfOrderRegister(width * 5));
+	    std::unique_ptr<RegisterBase>(new InOrderRegister(width * 5));
 
 	registers[PipelineRegister::WB] =
-	    std::unique_ptr<RegisterBase>(new OutOfOrderRegister(width * 5));
+	    std::unique_ptr<RegisterBase>(new InOrderRegister(width * 5));
 
 	registers[PipelineRegister::ROB] =
 	    std::unique_ptr<RegisterBase>(new ReorderBuffer(robSize, width));
@@ -42,8 +42,8 @@ void Pipeline::fetch()
 	if ((currentIndex < instructionCache.size()) &&
 	    (registers[PipelineRegister::DE]->ready())) {
 		// Fetch <width> or fewer instructions
-		for (unsigned long i = 0;
-		     (i < width) && (currentIndex < instructionCache.size()); i++) {
+		for (int i = 0; (i < width) && (currentIndex < instructionCache.size());
+		     i++) {
 			auto instruction = instructionCache[currentIndex];
 			++currentIndex;
 
@@ -96,12 +96,10 @@ void Pipeline::rename()
 					}
 				}
 
-				if (instruction->destOrig() != -1) {
-					// Allocate in ROB and update RMT / Instruction
-					registers[PipelineRegister::ROB]->add(instruction);
-					instruction->dest(registers[PipelineRegister::ROB]->tailIndex());
-					renameMapTable[instruction->destOrig()] = instruction->dest();
-				}
+				// Allocate in ROB and update RMT / Instruction
+				registers[PipelineRegister::ROB]->add(instruction);
+				instruction->dest(registers[PipelineRegister::ROB]->tailIndex());
+				renameMapTable[instruction->destOrig()] = instruction->dest();
 
 				registers[PipelineRegister::RR]->add(instruction);
 			}
@@ -207,7 +205,7 @@ void Pipeline::issue()
 		// XXX -> May need to do more than check if the execute_list is full
 		for (int i = 0, readyCount = 0;
 		     (i <= registers[PipelineRegister::IQ]->tailIndex()) &&
-		     (readyCount < registers[PipelineRegister::execute_list]->getWidth()) &&
+		     (readyCount < width) &&
 		     registers[PipelineRegister::execute_list]->ready();
 		     ++i) {
 			// Iterating in order, so oldest instruction is first, youngest last.
@@ -280,19 +278,19 @@ void Pipeline::execute()
 			switch (instruction->op()) {
 			case 0:
 				if (instruction->executeCount() == 1) {
-					instruction->markComplete();
+					instruction->markExecuteDone();
 				}
 				break;
 
 			case 1:
 				if (instruction->executeCount() == 2) {
-					instruction->markComplete();
+					instruction->markExecuteDone();
 				}
 				break;
 
 			case 2:
 				if (instruction->executeCount() == 5) {
-					instruction->markComplete();
+					instruction->markExecuteDone();
 				}
 				break;
 
@@ -300,11 +298,7 @@ void Pipeline::execute()
 				break;
 			}
 
-			if (instruction->isComplete()) {
-				//				registers[PipelineRegister::ROB]
-				//				    ->at(instruction->dest())
-				//				    ->markComplete();
-
+			if (instruction->executeDone()) {
 				// XXX -> May have too many instructions completing at once with
 				//        the way code is now. Not 100% sure if so or how to handle.
 				completeInstructions.push_back(instruction);
@@ -319,10 +313,55 @@ void Pipeline::execute()
 }
 
 void Pipeline::writeback()
-{}
+{
+	if (!registers[PipelineRegister::WB]->empty()) {
+		// ROB already has instructions marked as ready from the execute stage
+		// Clear the writeback register
+		while (!registers[PipelineRegister::WB]->empty()) {
+			auto instruction = registers[PipelineRegister::WB]->pop();
+			instruction->initCycle(PipelineStage::Writeback, overallCycle);
+			instruction->updateCycle(PipelineStage::Writeback);
+			instruction->markComplete();
+			instruction->markRetire();
+		}
+	}
+}
 
 void Pipeline::retire()
-{}
+{
+	if (!registers[PipelineRegister::ROB]->empty()) {
+		// Keep a vector of completed instructions for removal at the end
+		std::vector<int> completeInstructions;
+
+		for (int i = registers[PipelineRegister::ROB]->headIndex();
+		     i <= registers[PipelineRegister::ROB]->tailIndex(); ++i) {
+			auto instruction = registers[PipelineRegister::ROB]->at(i);
+
+			if (instruction->isRetired()) {
+				// XXX -> Right check against width?
+				if (static_cast<int>(completeInstructions.size()) < width) {
+					instruction->initCycle(PipelineStage::Retire, overallCycle);
+					instruction->updateCycle(PipelineStage::Retire);
+					completeInstructions.push_back(i);
+
+					// Check and reset RMT if needed
+					if (registers[PipelineRegister::ROB]->at(
+					        renameMapTable[instruction->destOrig()]) ==
+					    instruction) {
+						renameMapTable[instruction->destOrig()] = -1;
+					}
+
+				} else {
+					break;
+				}
+			}
+		}
+
+		for (auto &i : completeInstructions) {
+			registers[PipelineRegister::ROB]->remove(i);
+		}
+	}
+}
 
 void Pipeline::advanceCycle()
 {
@@ -337,7 +376,7 @@ void Pipeline::addToInstructionCache(std::shared_ptr<Instruction> instruction)
 bool Pipeline::instructionsFinished() const
 {
 	// return currentIndex < instructionCache.size();
-	return overallCycle < 15;
+	return overallCycle < 80;
 }
 
 void Pipeline::printInstructions() const

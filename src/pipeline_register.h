@@ -15,35 +15,42 @@
 //        at once
 class RegisterBase {
 public:
-	explicit RegisterBase(unsigned long width);
+	explicit RegisterBase(int width);
 	virtual ~RegisterBase() = default;
 
-	virtual unsigned long add(std::shared_ptr<Instruction> instruction) = 0;
+	virtual int add(std::shared_ptr<Instruction> instruction) = 0;
 	virtual std::shared_ptr<Instruction> pop() = 0;
 	virtual std::shared_ptr<Instruction> at(int index) = 0;
 	virtual void remove(std::shared_ptr<Instruction> instruction) = 0;
+	virtual void remove(int index) = 0;
 	virtual bool ready() const = 0;
 	virtual bool empty() const = 0;
-	// Used by issue queue to see how many lines are available for instructions
-	// virtual int linesAvailable() const = 0;
+
 	virtual int tailIndex() const = 0;
 	int getWidth() const
 	{
 		return static_cast<int>(width);
 	}
 
+	// For the ROB
+	virtual int headIndex() const
+	{
+		return -1;
+	}
+
 protected:
-	const unsigned long width;
+	const int width;
 };
 
 class InOrderRegister : public RegisterBase {
 public:
-	explicit InOrderRegister(unsigned long width);
+	explicit InOrderRegister(int width);
 
-	unsigned long add(std::shared_ptr<Instruction> instruction) override;
+	int add(std::shared_ptr<Instruction> instruction) override;
 	std::shared_ptr<Instruction> pop() override;
 	std::shared_ptr<Instruction> at(int index) override;
 	void remove(std::shared_ptr<Instruction> instruction) override;
+	void remove(int) override;
 	bool ready() const override;
 	bool empty() const override;
 	int tailIndex() const override;
@@ -54,42 +61,28 @@ protected:
 
 class ReorderBuffer : public InOrderRegister {
 public:
-	explicit ReorderBuffer(unsigned long robSize, unsigned long width);
-	bool ready() const override;
-
-private:
-	unsigned long pipelineWidth;
-};
-
-// Just subclass ReorderBuffer to rename it. Needs the modified ready()
-// as well.
-class IssueQueue : public ReorderBuffer {
-public:
-	explicit IssueQueue(unsigned long IQSize, unsigned long width)
-	    : ReorderBuffer{IQSize, width}
-	{}
-};
-
-// class ExecuteList : public InOrderRegister {
-// public:
-//	explicit ExecuteList(unsigned long width);
-//	bool ready() const override;
-//};
-
-class OutOfOrderRegister : public RegisterBase {
-public:
-	explicit OutOfOrderRegister(unsigned long width);
-
-	unsigned long add(std::shared_ptr<Instruction> instruction) override;
-	std::shared_ptr<Instruction> pop() override;
-	std::shared_ptr<Instruction> at(int index) override;
-	void remove(std::shared_ptr<Instruction> instruction) override;
+	ReorderBuffer(int robSize, int width);
+	void remove(int) override;
 	bool ready() const override;
 	bool empty() const override;
-	int tailIndex() const override;
+
+	int headIndex() const override
+	{
+		return head;
+	}
 
 private:
-	std::vector<std::shared_ptr<Instruction>> instructions;
+	int pipelineWidth;
+	int head;
+};
+
+class IssueQueue : public InOrderRegister {
+public:
+	IssueQueue(int IQSize, int width);
+	bool ready() const override;
+
+private:
+	int pipelineWidth;
 };
 
 #endif  // SIM_PIPELINE_REGISTER_H

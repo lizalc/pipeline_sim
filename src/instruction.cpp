@@ -13,9 +13,11 @@ Instruction::Instruction(unsigned long pc, int sequenceNum, int opType, int dest
       src1RobIndex{-1},
       src2RobIndex{-1},
       executionCount{0},
+      executed{false},
       complete{false},
       src1Ready{false},
-      src2Ready{false}
+      src2Ready{false},
+      retire{false}
 {}
 
 void Instruction::initCycle(PipelineStage stage, int cycle)
@@ -88,6 +90,16 @@ int Instruction::executeCount() const
 	return executionCount;
 }
 
+void Instruction::markExecuteDone()
+{
+	executed = true;
+}
+
+bool Instruction::executeDone() const
+{
+	return executed;
+}
+
 void Instruction::markSrc1Ready()
 {
 	src1Ready = true;
@@ -103,6 +115,11 @@ void Instruction::markComplete()
 	complete = true;
 }
 
+void Instruction::markRetire()
+{
+	retire = true;
+}
+
 bool Instruction::isReady() const
 {
 	return src1Ready && src2Ready;
@@ -111,6 +128,11 @@ bool Instruction::isReady() const
 bool Instruction::isComplete() const
 {
 	return complete;
+}
+
+bool Instruction::isRetired() const
+{
+	return retire;
 }
 
 std::ostream &operator<<(std::ostream &stream, const Instruction &instr)

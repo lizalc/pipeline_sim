@@ -30,12 +30,16 @@ public:
 	int op() const;
 	void execute();
 	int executeCount() const;
+	void markExecuteDone();
+	bool executeDone() const;
 
 	void markSrc1Ready();
 	void markSrc2Ready();
 	void markComplete();
+	void markRetire();
 	bool isReady() const;
 	bool isComplete() const;
+	bool isRetired() const;
 
 private:
 	const unsigned long pc;
@@ -43,8 +47,10 @@ private:
 	int destRobIndex, src1RobIndex, src2RobIndex;
 	// Number of execution cycles instruction has performed.
 	int executionCount;
+	bool executed;
 	bool complete;
 	bool src1Ready, src2Ready;
+	bool retire;
 
 	friend std::ostream &operator<<(std::ostream &stream, const Instruction &instr);
 };

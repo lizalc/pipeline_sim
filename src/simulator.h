@@ -9,8 +9,7 @@
 
 class Simulator {
 public:
-	Simulator(unsigned long robSize, unsigned long IQSize, unsigned long width,
-	          const std::string &traceFile);
+	Simulator(int robSize, int IQSize, int width, const std::string &traceFile);
 
 	void setup();
 	void run();
