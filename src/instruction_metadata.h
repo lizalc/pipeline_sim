@@ -18,8 +18,9 @@ public:
 	void initCycle(PipelineStage stage, unsigned long cycle);
 	// Increments current stage cycle count.
 	void updateCycle(PipelineStage stage);
-
-	void rename(InstructionRegister reg, int val);
+	int dest() const;
+	int src1() const;
+	int src2() const;
 
 private:
 	const int sequenceNum;

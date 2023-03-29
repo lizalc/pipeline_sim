@@ -16,8 +16,19 @@ public:
 	void initCycle(PipelineStage stage, unsigned long cycle);
 	// Increments current stage cycle count.
 	void updateCycle(PipelineStage stage);
-	void rename(InstructionRegister reg, int val);
-	void markReady();
+
+	void dest(int index);
+	void src1(int index);
+	void src2(int index);
+	int destOrig() const;
+	int src1Orig() const;
+	int src2Orig() const;
+	int dest() const;
+	int src1() const;
+	int src2() const;
+
+	void markSrc1Ready();
+	void markSrc2Ready();
 	void markComplete();
 	bool isReady() const;
 	bool isComplete() const;
@@ -25,8 +36,9 @@ public:
 private:
 	const unsigned long pc;
 	InstructionMetadata data;
-	bool status;
+	int destRobIndex, src1RobIndex, src2RobIndex;
 	bool complete;
+	bool src1Ready, src2Ready;
 
 	friend std::ostream &operator<<(std::ostream &stream, const Instruction &instr);
 };

@@ -8,6 +8,10 @@
 Pipeline::Pipeline(unsigned long robSize, unsigned long IQSize, unsigned long width)
     : width{width}, overallCycle{0}, currentIndex{0}
 {
+	for (int i = 0; i < 67; ++i) {
+		renameMapTable[i] = -1;
+	}
+
 	registers[PipelineRegister::DE] =
 	    std::unique_ptr<RegisterBase>(new InOrderRegister(width));
 
@@ -76,7 +80,29 @@ void Pipeline::rename()
 				instruction->initCycle(PipelineStage::Rename, overallCycle);
 				instruction->updateCycle(PipelineStage::Rename);
 
-				registers[PipelineRegister::ROB]->add(instruction);
+				if (instruction->src1Orig() != -1) {
+					// Rename to current ROB if need be otherwise read is from ARF
+					// or immediate value
+					if (renameMapTable[instruction->src1Orig()] != -1) {
+						instruction->src1(renameMapTable[instruction->src1Orig()]);
+					}
+				}
+
+				if (instruction->src2Orig() != -1) {
+					// Rename to current ROB if need be otherwise read is from ARF
+					// or immediate value
+					if (renameMapTable[instruction->src2Orig()] != -1) {
+						instruction->src2(renameMapTable[instruction->src2Orig()]);
+					}
+				}
+
+				if (instruction->destOrig() != -1) {
+					// Allocate in ROB and update RMT / Instruction
+					registers[PipelineRegister::ROB]->add(instruction);
+					instruction->dest(registers[PipelineRegister::ROB]->tailIndex());
+					renameMapTable[instruction->destOrig()] = instruction->dest();
+				}
+
 				registers[PipelineRegister::RR]->add(instruction);
 			}
 		}
@@ -86,16 +112,40 @@ void Pipeline::rename()
 void Pipeline::registerRead()
 {
 	if (!registers[PipelineRegister::RR]->empty()) {
-		// Need to handle readiness of instructions here
-		// as this is where things can get out of order.
-		// Essentially, need to handle dependencies in the
-		// instructions. Something about wakeup too.
-		// FIXME -> Ignoring for now
 		if (registers[PipelineRegister::DI]->ready()) {
 			while (!registers[PipelineRegister::RR]->empty()) {
 				auto instruction = registers[PipelineRegister::RR]->pop();
 				instruction->initCycle(PipelineStage::RegisterRead, overallCycle);
 				instruction->updateCycle(PipelineStage::RegisterRead);
+
+				if (instruction->src1() == -1) {
+					instruction->markSrc1Ready();
+				} else {
+					// Check if instruction ROB points to is complete (writeback
+					// done).
+					// XXX -> May have problems here depending on when instructions
+					//        are retired and cleared from ROB
+					if (registers[PipelineRegister::ROB]
+					        ->at(instruction->src1())
+					        ->isComplete()) {
+						instruction->markSrc1Ready();
+					}
+				}
+
+				if (instruction->src2() == -1) {
+					instruction->markSrc2Ready();
+				} else {
+					// Check if instruction ROB points to is complete (writeback
+					// done).
+					// XXX -> May have problems here depending on when instructions
+					//        are retired and cleared from ROB
+					if (registers[PipelineRegister::ROB]
+					        ->at(instruction->src2())
+					        ->isComplete()) {
+						instruction->markSrc2Ready();
+					}
+				}
+
 				registers[PipelineRegister::DI]->add(instruction);
 			}
 		}
@@ -110,6 +160,35 @@ void Pipeline::dispatch()
 			auto instruction = registers[PipelineRegister::DI]->pop();
 			instruction->initCycle(PipelineStage::Dispatch, overallCycle);
 			instruction->updateCycle(PipelineStage::Dispatch);
+
+			if (instruction->src1() == -1) {
+				instruction->markSrc1Ready();
+			} else {
+				// Check if instruction ROB points to is complete (writeback
+				// done).
+				// XXX -> May have problems here depending on when instructions
+				//        are retired and cleared from ROB
+				if (registers[PipelineRegister::ROB]
+				        ->at(instruction->src1())
+				        ->isComplete()) {
+					instruction->markSrc1Ready();
+				}
+			}
+
+			if (instruction->src2() == -1) {
+				instruction->markSrc2Ready();
+			} else {
+				// Check if instruction ROB points to is complete (writeback
+				// done).
+				// XXX -> May have problems here depending on when instructions
+				//        are retired and cleared from ROB
+				if (registers[PipelineRegister::ROB]
+				        ->at(instruction->src2())
+				        ->isComplete()) {
+					instruction->markSrc2Ready();
+				}
+			}
+
 			registers[PipelineRegister::IQ]->add(instruction);
 		}
 	}
@@ -118,12 +197,11 @@ void Pipeline::dispatch()
 void Pipeline::issue()
 {
 	if (!registers[PipelineRegister::IQ]->empty() &&
-		// FIXME -> Execute_list ready is more complex than
-		//          just having space available.
+	    // FIXME -> Execute_list ready is more complex than
+	    //          just having space available.
 	    registers[PipelineRegister::execute_list]->ready()) {
-
 		// FIXME -> Issue UP TO width instructions that are READY
-		while (!registers[PipelineRegister::IQ])
+		// while (!registers[PipelineRegister::IQ])
 	}
 }
 

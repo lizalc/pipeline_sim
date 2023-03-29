@@ -5,8 +5,8 @@
 #define SIM_PIPELINE_REGISTER_H
 
 #include "instruction.h"
+#include <deque>
 #include <memory>
-#include <queue>
 #include <vector>
 
 // Registers can be in-order or out-of-order (execute_list / writeback out-of-order
@@ -18,10 +18,12 @@ public:
 	explicit RegisterBase(unsigned long width);
 	virtual ~RegisterBase() = default;
 
-	virtual void add(std::shared_ptr<Instruction> instruction) = 0;
+	virtual unsigned long add(std::shared_ptr<Instruction> instruction) = 0;
 	virtual std::shared_ptr<Instruction> pop() = 0;
+	virtual std::shared_ptr<Instruction> at(int index) = 0;
 	virtual bool ready() const = 0;
 	virtual bool empty() const = 0;
+	virtual int tailIndex() const = 0;
 
 protected:
 	const unsigned long width;
@@ -31,13 +33,15 @@ class InOrderRegister : public RegisterBase {
 public:
 	explicit InOrderRegister(unsigned long width);
 
-	void add(std::shared_ptr<Instruction> instruction) override;
+	unsigned long add(std::shared_ptr<Instruction> instruction) override;
 	std::shared_ptr<Instruction> pop() override;
+	std::shared_ptr<Instruction> at(int index) override;
 	bool ready() const override;
 	bool empty() const override;
+	int tailIndex() const override;
 
 protected:
-	std::queue<std::shared_ptr<Instruction>> instructions;
+	std::deque<std::shared_ptr<Instruction>> instructions;
 };
 
 class ReorderBuffer : public InOrderRegister {
@@ -62,10 +66,12 @@ class OutOfOrderRegister : public RegisterBase {
 public:
 	explicit OutOfOrderRegister(unsigned long width);
 
-	void add(std::shared_ptr<Instruction> instruction) override;
+	unsigned long add(std::shared_ptr<Instruction> instruction) override;
 	std::shared_ptr<Instruction> pop() override;
+	std::shared_ptr<Instruction> at(int index) override;
 	bool ready() const override;
 	bool empty() const override;
+	int tailIndex() const override;
 
 private:
 	std::vector<std::shared_ptr<Instruction>> instructions;

@@ -35,6 +35,7 @@ private:
 	// final data.
 	std::vector<std::shared_ptr<Instruction>> instructionCache;
 	std::unordered_map<PipelineRegister, std::unique_ptr<RegisterBase>> registers;
+	std::unordered_map<int, int> renameMapTable;
 
 	// Pipeline width
 	unsigned long width;

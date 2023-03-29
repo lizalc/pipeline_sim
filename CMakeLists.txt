@@ -14,7 +14,9 @@ set(SOURCE_FILES
 		src/pipeline.cpp
 		src/pipeline.h
 		src/simulator.cpp
-		src/simulator.h src/pipeline_register.cpp src/pipeline_register.h)
+		src/simulator.h
+		src/pipeline_register.cpp
+		src/pipeline_register.h)
 
 add_executable(sim ${SOURCE_FILES})
 set_target_properties(sim PROPERTIES

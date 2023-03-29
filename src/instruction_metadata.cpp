@@ -36,21 +36,19 @@ void InstructionMetadata::updateCycle(PipelineStage stage)
 	++stageCycles[stage].second;
 }
 
-void InstructionMetadata::rename(InstructionRegister reg, int val)
+int InstructionMetadata::dest() const
 {
-	switch (reg) {
-	case InstructionRegister::Destination:
-		destReg = val;
-		break;
+	return destReg;
+}
 
-	case InstructionRegister::Source1:
-		srcReg1 = val;
-		break;
+int InstructionMetadata::src1() const
+{
+	return srcReg1;
+}
 
-	case InstructionRegister::Source2:
-		srcReg2 = val;
-		break;
-	}
+int InstructionMetadata::src2() const
+{
+	return srcReg2;
 }
 
 std::pair<int, int> InstructionMetadata::operator[](PipelineStage stage) const
