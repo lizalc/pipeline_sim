@@ -2,6 +2,7 @@
 // ECE 463 Fall 2018
 
 #include "pipeline_register.h"
+#include <algorithm>
 
 RegisterBase::RegisterBase(unsigned long width) : width{width}
 {}
@@ -25,6 +26,13 @@ std::shared_ptr<Instruction> InOrderRegister::pop()
 std::shared_ptr<Instruction> InOrderRegister::at(int index)
 {
 	return instructions.at(static_cast<size_t>(index));
+}
+
+void InOrderRegister::remove(std::shared_ptr<Instruction> instruction)
+{
+	instructions.erase(
+	    std::remove(instructions.begin(), instructions.end(), instruction),
+	    instructions.end());
 }
 
 bool InOrderRegister::ready() const
@@ -52,6 +60,14 @@ bool ReorderBuffer::ready() const
 	return pipelineWidth < (width - instructions.size());
 }
 
+// ExecuteList::ExecuteList(unsigned long width) : InOrderRegister{width}
+//{}
+//
+// bool ExecuteList::ready() const
+//{
+//
+//}
+
 OutOfOrderRegister::OutOfOrderRegister(unsigned long width) : RegisterBase{width}
 {}
 
@@ -71,6 +87,13 @@ std::shared_ptr<Instruction> OutOfOrderRegister::pop()
 std::shared_ptr<Instruction> OutOfOrderRegister::at(int index)
 {
 	return instructions.at(static_cast<size_t>(index));
+}
+
+void OutOfOrderRegister::remove(std::shared_ptr<Instruction> instruction)
+{
+	instructions.erase(
+	    std::remove(instructions.begin(), instructions.end(), instruction),
+	    instructions.end());
 }
 
 bool OutOfOrderRegister::ready() const

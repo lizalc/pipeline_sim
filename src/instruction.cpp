@@ -12,6 +12,7 @@ Instruction::Instruction(unsigned long pc, int sequenceNum, int opType, int dest
       destRobIndex{-1},
       src1RobIndex{-1},
       src2RobIndex{-1},
+      executionCount{0},
       complete{false},
       src1Ready{false},
       src2Ready{false}
@@ -70,6 +71,16 @@ int Instruction::src1() const
 int Instruction::src2() const
 {
 	return src2RobIndex;
+}
+
+void Instruction::execute()
+{
+	++executionCount;
+}
+
+int Instruction::executeCount() const
+{
+	return executionCount;
 }
 
 void Instruction::markSrc1Ready()

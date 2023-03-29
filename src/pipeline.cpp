@@ -200,8 +200,64 @@ void Pipeline::issue()
 	    // FIXME -> Execute_list ready is more complex than
 	    //          just having space available.
 	    registers[PipelineRegister::execute_list]->ready()) {
-		// FIXME -> Issue UP TO width instructions that are READY
-		// while (!registers[PipelineRegister::IQ])
+		// Keep a temporary vector of issued instructions so they can be properly
+		// removed from issue queue.
+		std::vector<std::shared_ptr<Instruction>> readyInstructions;
+
+		// XXX -> May need to do more than check if the execute_list is full
+		for (int i = 0, readyCount = 0;
+		     (i <= registers[PipelineRegister::IQ]->tailIndex()) &&
+		     (readyCount < registers[PipelineRegister::execute_list]->getWidth()) &&
+		     registers[PipelineRegister::execute_list]->ready();
+		     ++i) {
+			// Iterating in order, so oldest instruction is first, youngest last.
+			// If instruction is ready, it is issued, until either no more ready
+			// instructions remain, max width has been reached, or the execute_list
+			// is full.
+			auto instruction = registers[PipelineRegister::IQ]->at(i);
+			// XXX -> Double check that this counts correctly for stalled / sent
+			//        instructions
+			instruction->initCycle(PipelineStage::Issue, overallCycle);
+			instruction->updateCycle(PipelineStage::Issue);
+
+			if (instruction->src1() == -1) {
+				instruction->markSrc1Ready();
+			} else {
+				// Check if instruction ROB points to is complete (writeback
+				// done).
+				// XXX -> May have problems here depending on when instructions
+				//        are retired and cleared from ROB
+				if (registers[PipelineRegister::ROB]
+				        ->at(instruction->src1())
+				        ->isComplete()) {
+					instruction->markSrc1Ready();
+				}
+			}
+
+			if (instruction->src2() == -1) {
+				instruction->markSrc2Ready();
+			} else {
+				// Check if instruction ROB points to is complete (writeback
+				// done).
+				// XXX -> May have problems here depending on when instructions
+				//        are retired and cleared from ROB
+				if (registers[PipelineRegister::ROB]
+				        ->at(instruction->src2())
+				        ->isComplete()) {
+					instruction->markSrc2Ready();
+				}
+			}
+
+			if (instruction->isReady()) {
+				++readyCount;
+				readyInstructions.push_back(instruction);
+				registers[PipelineRegister::execute_list]->add(instruction);
+			}
+		}
+
+		for (auto &i : readyInstructions) {
+			registers[PipelineRegister::IQ]->remove(i);
+		}
 	}
 }
 
@@ -227,7 +283,7 @@ void Pipeline::addToInstructionCache(std::shared_ptr<Instruction> instruction)
 bool Pipeline::instructionsFinished() const
 {
 	// return currentIndex < instructionCache.size();
-	return overallCycle < 5;
+	return overallCycle < 15;
 }
 
 void Pipeline::printInstructions() const

@@ -27,6 +27,9 @@ public:
 	int src1() const;
 	int src2() const;
 
+	void execute();
+	int executeCount() const;
+
 	void markSrc1Ready();
 	void markSrc2Ready();
 	void markComplete();
@@ -37,6 +40,8 @@ private:
 	const unsigned long pc;
 	InstructionMetadata data;
 	int destRobIndex, src1RobIndex, src2RobIndex;
+	// Number of execution cycles instruction has performed.
+	int executionCount;
 	bool complete;
 	bool src1Ready, src2Ready;
 
