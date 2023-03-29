@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
 project(sim CXX)
 
+# Secret Scanning test token: ghp_DY&YxXmH7@5%zL@5jiUgf8bRvt3e&R1^ID*T3zK3wKfiSbTsb
+# Above password is for testing only. Do not use in production.
+
 # Set to ON when viewing full build output is desired
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
