@@ -13,6 +13,8 @@ void create_html(char *out) {
 	FILE *fp_temp;
 	FILE *fp_html;
 
+	printf("%s\n", out);
+
 	sprintf(name, "%s.html", out);
 	fp_temp = fopen(name, "r");
 	if (fp_temp) {
