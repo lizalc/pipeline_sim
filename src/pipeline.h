@@ -38,7 +38,9 @@ private:
 	// as a way to go back through the processed instructions to display
 	// final data.
 	std::vector<std::shared_ptr<Instruction>> instructions;
-	std::unordered_map<PipelineRegister, std::unique_ptr<RegisterBase>> registers;
+	std::unordered_map<PipelineRegister, std::unique_ptr<RegisterBase>,
+	                   std::hash<int>>
+	    	registers;
 	std::unordered_map<int, int> renameMapTable;
 	ReorderBuffer reorderBuffer;
 

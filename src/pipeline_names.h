@@ -5,7 +5,7 @@
 #ifndef SIM_PIPELINE_NAMES_H
 #define SIM_PIPELINE_NAMES_H
 
-enum class PipelineStage {
+enum PipelineStage {
 	Fetch,
 	Decode,
 	Rename,
@@ -17,8 +17,8 @@ enum class PipelineStage {
 	Retire
 };
 
-enum class PipelineRegister { DE, RN, RR, DI, IQ, execute_list, WB, ROB };
+enum PipelineRegister { DE, RN, RR, DI, IQ, execute_list, WB, ROB };
 
-enum class InstructionRegister { Destination, Source1, Source2 };
+enum InstructionRegister { Destination, Source1, Source2 };
 
 #endif  // SIM_PIPELINE_NAMES_H

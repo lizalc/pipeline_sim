@@ -28,7 +28,8 @@ private:
 	const int sequenceNum;
 	const int opType;
 	int destReg, srcReg1, srcReg2;
-	std::unordered_map<PipelineStage, std::pair<int, int>> stageCycles;
+	std::unordered_map<PipelineStage, std::pair<int, int>, std::hash<int>>
+	    stageCycles;
 
 	std::pair<int, int> operator[](PipelineStage stage) const;
 
