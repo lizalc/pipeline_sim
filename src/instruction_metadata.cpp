@@ -3,7 +3,7 @@
 // Project 3 - Superscalar Pipeline Simulator
 
 #include "instruction_metadata.h"
-#include "pipeline_stages.h"
+#include "pipeline_names.h"
 #include <ostream>
 
 InstructionMetadata::InstructionMetadata(int sequenceNum, int opType, int destReg,
@@ -34,6 +34,23 @@ void InstructionMetadata::initCycle(PipelineStage stage, int cycle)
 void InstructionMetadata::updateCycle(PipelineStage stage)
 {
 	++stageCycles[stage].second;
+}
+
+void InstructionMetadata::rename(InstructionRegisters reg, int val)
+{
+	switch (reg) {
+	case InstructionRegisters::Destination:
+		destReg = val;
+		break;
+
+	case InstructionRegisters::Source1:
+		srcReg1 = val;
+		break;
+
+	case InstructionRegisters::Source2:
+		srcReg2 = val;
+		break;
+	}
 }
 
 std::pair<int, int> InstructionMetadata::operator[](PipelineStage stage) const

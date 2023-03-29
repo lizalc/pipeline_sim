@@ -5,7 +5,7 @@
 #ifndef SIM_INSTRUCTION_METADATA_H
 #define SIM_INSTRUCTION_METADATA_H
 
-#include "pipeline_stages.h"
+#include "pipeline_names.h"
 #include <unordered_map>
 #include <utility>
 
@@ -19,11 +19,12 @@ public:
 	// Increments current stage cycle count.
 	void updateCycle(PipelineStage stage);
 
+	void rename(InstructionRegisters reg, int val);
+
 private:
 	const int sequenceNum;
 	const int opType;
-	const int destReg;
-	const int srcReg1, srcReg2;
+	int destReg, srcReg1, srcReg2;
 	std::unordered_map<PipelineStage, std::pair<int, int>> stageCycles;
 
 	std::pair<int, int> operator[](PipelineStage stage) const;
