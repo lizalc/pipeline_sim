@@ -15,7 +15,7 @@ public:
 	                    int srcReg2);
 
 	// Sets the cycle a stage started
-	void initCycle(PipelineStage stage, int cycle);
+	void initCycle(PipelineStage stage, unsigned long cycle);
 	// Increments current stage cycle count.
 	void updateCycle(PipelineStage stage);
 
@@ -25,7 +25,7 @@ private:
 	const int sequenceNum;
 	const int opType;
 	int destReg, srcReg1, srcReg2;
-	std::unordered_map<PipelineStage, std::pair<int, int>> stageCycles;
+	std::unordered_map<PipelineStage, std::pair<unsigned long, int>> stageCycles;
 
 	std::pair<int, int> operator[](PipelineStage stage) const;
 

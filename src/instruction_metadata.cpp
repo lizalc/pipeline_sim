@@ -26,7 +26,7 @@ InstructionMetadata::InstructionMetadata(int sequenceNum, int opType, int destRe
       }
 {}
 
-void InstructionMetadata::initCycle(PipelineStage stage, int cycle)
+void InstructionMetadata::initCycle(PipelineStage stage, unsigned long cycle)
 {
 	stageCycles[stage].first = cycle;
 }

@@ -17,7 +17,7 @@ int main(const int argc, const char *argv[])
 	                    std::stoul(argv[3]), argv[4]};
 
 	simulator.setup();
-	// simulator.run();
+	simulator.run();
 	simulator.showResults();
 
 	return 0;

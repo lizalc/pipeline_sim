@@ -23,14 +23,25 @@ public:
 	void writeback();
 	void retire();
 
-	void setInstructionCache(std::vector<Instruction> &&instructions);
+	void advanceCycle();
+	void addToInstructionCache(std::shared_ptr<Instruction> instruction);
+	bool instructionsFinished() const;
 	void printInstructions() const;
 
 private:
 	// Project assumes perfect caches and branch prediction, so
-	// just load all instructions into the instruction cache.
-	std::vector<Instruction> instructionCache;
+	// just load all instructions into the instruction cache. Also serves
+	// as a way to go back through the processed instructions to display
+	// final data.
+	std::vector<std::shared_ptr<Instruction>> instructionCache;
 	std::unordered_map<PipelineRegister, std::unique_ptr<RegisterBase>> registers;
+
+	// Pipeline width
+	unsigned long width;
+	// Current overall cycle
+	unsigned long overallCycle;
+	// For getting the current instruction from the instruction cache
+	size_t currentIndex;
 
 	// ROB?
 	// Cycle counters?

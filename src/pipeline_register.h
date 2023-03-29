@@ -5,6 +5,7 @@
 #define SIM_PIPELINE_REGISTER_H
 
 #include "instruction.h"
+#include <memory>
 #include <queue>
 #include <vector>
 
@@ -17,9 +18,10 @@ public:
 	explicit RegisterBase(unsigned long width);
 	virtual ~RegisterBase() = default;
 
-	virtual void add(Instruction *instruction) = 0;
-	virtual Instruction *pop() = 0;
-	virtual bool ready() = 0;
+	virtual void add(std::shared_ptr<Instruction> instruction) = 0;
+	virtual std::shared_ptr<Instruction> pop() = 0;
+	virtual bool ready() const = 0;
+	virtual bool empty() const = 0;
 
 protected:
 	const unsigned long width;
@@ -29,24 +31,44 @@ class InOrderRegister : public RegisterBase {
 public:
 	explicit InOrderRegister(unsigned long width);
 
-	void add(Instruction *instruction) override;
-	Instruction *pop() override;
-	bool ready() override;
+	void add(std::shared_ptr<Instruction> instruction) override;
+	std::shared_ptr<Instruction> pop() override;
+	bool ready() const override;
+	bool empty() const override;
+
+protected:
+	std::queue<std::shared_ptr<Instruction>> instructions;
+};
+
+class ReorderBuffer : public InOrderRegister {
+public:
+	explicit ReorderBuffer(unsigned long robSize, unsigned long width);
+	bool ready() const override;
 
 private:
-	std::queue<Instruction *> instructions;
+	unsigned long pipelineWidth;
+};
+
+// Just subclass ReorderBuffer to rename it. Needs the modified ready()
+// as well.
+class IssueQueue : public ReorderBuffer {
+public:
+	explicit IssueQueue(unsigned long IQSize, unsigned long width)
+	    : ReorderBuffer{IQSize, width}
+	{}
 };
 
 class OutOfOrderRegister : public RegisterBase {
 public:
 	explicit OutOfOrderRegister(unsigned long width);
 
-	void add(Instruction *instruction) override;
-	Instruction *pop() override;
-	bool ready() override;
+	void add(std::shared_ptr<Instruction> instruction) override;
+	std::shared_ptr<Instruction> pop() override;
+	bool ready() const override;
+	bool empty() const override;
 
 private:
-	std::vector<Instruction *> instructions;
+	std::vector<std::shared_ptr<Instruction>> instructions;
 };
 
 #endif  // SIM_PIPELINE_REGISTER_H

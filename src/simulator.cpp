@@ -1,8 +1,10 @@
+#include <memory>
+
 // Donavan Lance (dlance)
 // ECE 463 Fall 2018
 
-#include "simulator.h"
 #include "instruction.h"
+#include "simulator.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -33,13 +35,11 @@ void Simulator::setup()
 		int opType, destReg, srcReg1, srcReg2;
 		values >> opType >> destReg >> srcReg1 >> srcReg2;
 
-		instructions.emplace_back(Instruction(std::stoul(pc, nullptr, 16),
-		                                      sequenceNum, opType, destReg, srcReg1,
-		                                      srcReg2));
+		pipeline.addToInstructionCache(
+		    std::make_shared<Instruction>(std::stoul(pc, nullptr, 16), sequenceNum,
+		                                  opType, destReg, srcReg1, srcReg2));
 		++sequenceNum;
 	}
-
-	pipeline.setInstructionCache(std::move(instructions));
 }
 
 void Simulator::run()
@@ -65,5 +65,7 @@ void Simulator::showResults()
 
 bool Simulator::advanceCycle()
 {
-	return false;
+	pipeline.advanceCycle();
+	// XXX -> advanceCycle likely needs to do more than this
+	return pipeline.instructionsFinished();
 }
