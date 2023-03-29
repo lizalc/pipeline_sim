@@ -22,20 +22,13 @@ public:
 	virtual std::shared_ptr<Instruction> pop() = 0;
 	virtual std::shared_ptr<Instruction> at(int index) = 0;
 	virtual void remove(std::shared_ptr<Instruction> instruction) = 0;
-	virtual void remove(int index) = 0;
 	virtual bool ready() const = 0;
 	virtual bool empty() const = 0;
 
 	virtual int tailIndex() const = 0;
 	int getWidth() const
 	{
-		return static_cast<int>(width);
-	}
-
-	// For the ROB
-	virtual int headIndex() const
-	{
-		return -1;
+		return width;
 	}
 
 protected:
@@ -50,7 +43,6 @@ public:
 	std::shared_ptr<Instruction> pop() override;
 	std::shared_ptr<Instruction> at(int index) override;
 	void remove(std::shared_ptr<Instruction> instruction) override;
-	void remove(int) override;
 	bool ready() const override;
 	bool empty() const override;
 	int tailIndex() const override;
@@ -59,21 +51,61 @@ protected:
 	std::deque<std::shared_ptr<Instruction>> instructions;
 };
 
-class ReorderBuffer : public InOrderRegister {
+class ReorderBuffer {
 public:
-	ReorderBuffer(int robSize, int width);
-	void remove(int) override;
-	bool ready() const override;
-	bool empty() const override;
+	struct BufferContents {
+		BufferContents(int d, unsigned long p,
+		               const std::shared_ptr<Instruction> &instr)
+		    : ready{false},
+		      executed{false},
+		      fullyRetired{false},
+		      destReg{d},
+		      pc{p},
+		      instruction(instr)
+		{}
 
-	int headIndex() const override
+		bool ready, executed, fullyRetired;
+		int destReg;
+		unsigned long pc;
+		// Pointer back to instruction that caused this ROB entry to be allocated
+		std::shared_ptr<Instruction> instruction;
+	};
+
+	ReorderBuffer(int robSize, int width);
+
+	int allocate(int destReg, unsigned long pc, std::shared_ptr<Instruction> instr);
+	BufferContents pop();
+	BufferContents peek();
+	std::shared_ptr<Instruction> at(int index);
+	void markValueReady(int index);
+	void markExecuteValueReady(int index);
+	bool valueReady(int index) const;
+	bool executeValueReady(int index) const;
+	bool fullyRetired(int index) const;
+	bool ready() const;
+	bool full() const;
+	bool empty() const;
+
+	int headIndex() const
 	{
 		return head;
 	}
 
+	int tailIndex() const
+	{
+		return tail;
+	}
+
+	int totalSize() const
+	{
+		return size;
+	}
+
 private:
-	int pipelineWidth;
-	int head;
+	std::vector<BufferContents> contents;
+	int size, pipelineWidth;
+	int head, tail;
+	bool mFull, mEmpty;
 };
 
 class IssueQueue : public InOrderRegister {

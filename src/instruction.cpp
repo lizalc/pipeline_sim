@@ -7,7 +7,7 @@
 
 Instruction::Instruction(unsigned long pc, int sequenceNum, int opType, int destReg,
                          int srcReg1, int srcReg2)
-    : pc{pc},
+    : programCounter{pc},
       data{sequenceNum, opType, destReg, srcReg1, srcReg2},
       destRobIndex{-1},
       src1RobIndex{-1},
@@ -17,7 +17,9 @@ Instruction::Instruction(unsigned long pc, int sequenceNum, int opType, int dest
       complete{false},
       src1Ready{false},
       src2Ready{false},
-      retire{false}
+      retire{false},
+      fullyRetired{false},
+      finalInstruction{false}
 {}
 
 void Instruction::initCycle(PipelineStage stage, int cycle)
@@ -75,6 +77,16 @@ int Instruction::src2() const
 	return src2RobIndex;
 }
 
+unsigned long Instruction::pc() const
+{
+	return programCounter;
+}
+
+int Instruction::sequence() const
+{
+	return data.sequence();
+}
+
 int Instruction::op() const
 {
 	return data.op();
@@ -120,6 +132,16 @@ void Instruction::markRetire()
 	retire = true;
 }
 
+void Instruction::markFullyRetired()
+{
+	fullyRetired = true;
+}
+
+void Instruction::markFinalInstruction()
+{
+	finalInstruction = true;
+}
+
 bool Instruction::isReady() const
 {
 	return src1Ready && src2Ready;
@@ -133,6 +155,16 @@ bool Instruction::isComplete() const
 bool Instruction::isRetired() const
 {
 	return retire;
+}
+
+bool Instruction::isFullyRetired() const
+{
+	return fullyRetired;
+}
+
+bool Instruction::isFinalInstruction() const
+{
+	return finalInstruction;
 }
 
 std::ostream &operator<<(std::ostream &stream, const Instruction &instr)

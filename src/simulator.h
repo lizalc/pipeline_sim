@@ -17,6 +17,7 @@ public:
 
 private:
 	Pipeline pipeline;
+	int robSize, IQSize, width;
 	const std::string traceFile;
 
 	// Belong here or in pipeline?

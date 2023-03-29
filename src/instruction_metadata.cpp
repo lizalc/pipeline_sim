@@ -60,6 +60,11 @@ int InstructionMetadata::op() const
 	return opType;
 }
 
+int InstructionMetadata::sequence() const
+{
+	return sequenceNum;
+}
+
 std::pair<int, int> InstructionMetadata::operator[](PipelineStage stage) const
 {
 	return stageCycles.at(stage);
@@ -97,7 +102,7 @@ std::ostream &operator<<(std::ostream &stream, const InstructionMetadata &data)
 	stream << "WB{" << stageData.first << ',' << stageData.second << "} ";
 
 	stageData = data[PipelineStage::Retire];
-	stream << "RE{" << stageData.first << ',' << stageData.second << "} ";
+	stream << "RT{" << stageData.first << ',' << stageData.second << "}";
 
 	return stream;
 }

@@ -22,6 +22,7 @@ public:
 	int src1() const;
 	int src2() const;
 	int op() const;
+	int sequence() const;
 
 private:
 	const int sequenceNum;

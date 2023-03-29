@@ -26,7 +26,9 @@ public:
 	int dest() const;
 	int src1() const;
 	int src2() const;
+	unsigned long pc() const;
 
+	int sequence() const;
 	int op() const;
 	void execute();
 	int executeCount() const;
@@ -37,12 +39,16 @@ public:
 	void markSrc2Ready();
 	void markComplete();
 	void markRetire();
+	void markFullyRetired();
+	void markFinalInstruction();
 	bool isReady() const;
 	bool isComplete() const;
 	bool isRetired() const;
+	bool isFullyRetired() const;
+	bool isFinalInstruction() const;
 
 private:
-	const unsigned long pc;
+	const unsigned long programCounter;
 	InstructionMetadata data;
 	int destRobIndex, src1RobIndex, src2RobIndex;
 	// Number of execution cycles instruction has performed.
@@ -50,7 +56,8 @@ private:
 	bool executed;
 	bool complete;
 	bool src1Ready, src2Ready;
-	bool retire;
+	bool retire, fullyRetired;
+	bool finalInstruction;
 
 	friend std::ostream &operator<<(std::ostream &stream, const Instruction &instr);
 };

@@ -6,6 +6,7 @@
 
 #include "instruction.h"
 #include "pipeline_register.h"
+#include <map>
 #include <memory>
 #include <unordered_map>
 
@@ -26,16 +27,20 @@ public:
 	void advanceCycle();
 	void addToInstructionCache(std::shared_ptr<Instruction> instruction);
 	bool instructionsFinished() const;
+	void markLastInstruction();
 	void printInstructions() const;
+	int getTotalCycles() const;
+	int getInstructionCount() const;
 
 private:
 	// Project assumes perfect caches and branch prediction, so
 	// just load all instructions into the instruction cache. Also serves
 	// as a way to go back through the processed instructions to display
 	// final data.
-	std::vector<std::shared_ptr<Instruction>> instructionCache;
+	std::vector<std::shared_ptr<Instruction>> instructions;
 	std::unordered_map<PipelineRegister, std::unique_ptr<RegisterBase>> registers;
 	std::unordered_map<int, int> renameMapTable;
+	ReorderBuffer reorderBuffer;
 
 	// Pipeline width
 	int width;
@@ -43,9 +48,7 @@ private:
 	int overallCycle;
 	// For getting the current instruction from the instruction cache
 	size_t currentIndex;
-
-	// ROB?
-	// Cycle counters?
+	bool lastInstructionRetired;
 };
 
 #endif  // SIM_PIPELINE_H
