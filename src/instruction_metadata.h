@@ -6,6 +6,7 @@
 #define SIM_INSTRUCTION_METADATA_H
 
 #include "pipeline_names.h"
+#include <ostream>
 #include <unordered_map>
 #include <utility>
 
