@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 Simulator::Simulator(const int robSize, const int IQSize, const int width,
                      const std::string &traceFile)
