@@ -2,5 +2,15 @@
 // ECE 463 Fall 2018
 // Project 3 - Superscalar Pipeline Simulator
 
-
 #include "instruction.h"
+#include <ostream>
+
+Instruction::Instruction(int sequenceNum, int opType, int destReg, int srcReg1,
+                         int srcReg2)
+    : data{sequenceNum, opType, destReg, srcReg1, srcReg2}
+{}
+
+std::ostream &operator<<(std::ostream &stream, const Instruction &instr)
+{
+	return stream << instr.data;
+}
