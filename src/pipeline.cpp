@@ -28,7 +28,7 @@ Pipeline::Pipeline(unsigned long robSize, unsigned long IQSize, unsigned long wi
 	    std::unique_ptr<RegisterBase>(new OutOfOrderRegister(width * 5));
 
 	// Should ROB be in order or out of order? Actually, this should be
-	// in order with respect to program order.
+	// in order with respect to program order. May need a new type for it.
 	registers[PipelineRegister::ROB] =
 	    std::unique_ptr<RegisterBase>(new InOrderRegister(robSize));
 }
