@@ -12,7 +12,9 @@ set(SOURCE_FILES
 		src/instruction.h
 		src/pipeline_names.h
 		src/pipeline.cpp
-		src/pipeline.h)
+		src/pipeline.h
+		src/simulator.cpp
+		src/simulator.h)
 
 add_executable(sim ${SOURCE_FILES})
 set_target_properties(sim PROPERTIES

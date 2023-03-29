@@ -4,6 +4,9 @@
 #ifndef SIM_PIPELINE_H
 #define SIM_PIPELINE_H
 
+#include "instruction.h"
+#include <vector>
+
 class Pipeline {
 public:
 	Pipeline();
@@ -18,7 +21,14 @@ public:
 	void writeback();
 	void retire();
 
-	// private:
+	void setInstructionCache(std::vector<Instruction> &&instructions);
+	void printInstructions() const;
+
+private:
+	// Project assumes perfect caches and branch prediction, so
+	// just load all instructions into the instruction cache.
+	std::vector<Instruction> instructionCache;
+
 	// Array / vector of pipeline registers?
 	// ROB?
 	// Cycle counters?

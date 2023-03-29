@@ -12,5 +12,6 @@ Instruction::Instruction(int sequenceNum, int opType, int destReg, int srcReg1,
 
 std::ostream &operator<<(std::ostream &stream, const Instruction &instr)
 {
-	return stream << instr.data;
+	// Don't force the metadata to handle formatting (newlines)
+	return stream << instr.data << '\n';
 }
