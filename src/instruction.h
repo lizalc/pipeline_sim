@@ -9,9 +9,11 @@
 
 class Instruction {
 public:
-	Instruction(int sequenceNum, int opType, int destReg, int srcReg1, int srcReg2);
+	Instruction(unsigned long pc, int sequenceNum, int opType, int destReg,
+	            int srcReg1, int srcReg2);
 
 private:
+	const unsigned long pc;
 	InstructionMetadata data;
 
 	friend std::ostream &operator<<(std::ostream &stream, const Instruction &instr);

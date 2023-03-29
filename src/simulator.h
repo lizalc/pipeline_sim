@@ -9,7 +9,8 @@
 
 class Simulator {
 public:
-	Simulator(int robSize, int IQSize, int width, const std::string &traceFile);
+	Simulator(unsigned long robSize, unsigned long IQSize, unsigned long width,
+	          const std::string &traceFile);
 
 	void setup();
 	void run();
@@ -17,8 +18,6 @@ public:
 
 private:
 	Pipeline pipeline;
-
-	const int robSize, IQSize, width;
 	const std::string traceFile;
 
 	// Belong here or in pipeline?

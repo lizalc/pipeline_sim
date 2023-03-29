@@ -36,18 +36,18 @@ void InstructionMetadata::updateCycle(PipelineStage stage)
 	++stageCycles[stage].second;
 }
 
-void InstructionMetadata::rename(InstructionRegisters reg, int val)
+void InstructionMetadata::rename(InstructionRegister reg, int val)
 {
 	switch (reg) {
-	case InstructionRegisters::Destination:
+	case InstructionRegister::Destination:
 		destReg = val;
 		break;
 
-	case InstructionRegisters::Source1:
+	case InstructionRegister::Source1:
 		srcReg1 = val;
 		break;
 
-	case InstructionRegisters::Source2:
+	case InstructionRegister::Source2:
 		srcReg2 = val;
 		break;
 	}

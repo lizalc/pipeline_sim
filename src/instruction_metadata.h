@@ -19,7 +19,7 @@ public:
 	// Increments current stage cycle count.
 	void updateCycle(PipelineStage stage);
 
-	void rename(InstructionRegisters reg, int val);
+	void rename(InstructionRegister reg, int val);
 
 private:
 	const int sequenceNum;

@@ -5,9 +5,9 @@
 #include "instruction.h"
 #include <ostream>
 
-Instruction::Instruction(int sequenceNum, int opType, int destReg, int srcReg1,
-                         int srcReg2)
-    : data{sequenceNum, opType, destReg, srcReg1, srcReg2}
+Instruction::Instruction(unsigned long pc, int sequenceNum, int opType, int destReg,
+                         int srcReg1, int srcReg2)
+    : pc{pc}, data{sequenceNum, opType, destReg, srcReg1, srcReg2}
 {}
 
 std::ostream &operator<<(std::ostream &stream, const Instruction &instr)

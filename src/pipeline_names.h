@@ -17,6 +17,8 @@ enum class PipelineStage {
 	Retire
 };
 
-enum class InstructionRegisters { Destination, Source1, Source2 };
+enum class PipelineRegister { DE, RN, RR, DI, IQ, execute_list, WB, ROB };
+
+enum class InstructionRegister { Destination, Source1, Source2 };
 
 #endif  // SIM_PIPELINE_NAMES_H

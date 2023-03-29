@@ -5,11 +5,13 @@
 #define SIM_PIPELINE_H
 
 #include "instruction.h"
-#include <vector>
+#include "pipeline_register.h"
+#include <memory>
+#include <unordered_map>
 
 class Pipeline {
 public:
-	Pipeline();
+	Pipeline(unsigned long robSize, unsigned long IQSize, unsigned long width);
 
 	void fetch();
 	void decode();
@@ -28,8 +30,8 @@ private:
 	// Project assumes perfect caches and branch prediction, so
 	// just load all instructions into the instruction cache.
 	std::vector<Instruction> instructionCache;
+	std::unordered_map<PipelineRegister, std::unique_ptr<RegisterBase>> registers;
 
-	// Array / vector of pipeline registers?
 	// ROB?
 	// Cycle counters?
 };

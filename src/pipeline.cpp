@@ -4,8 +4,34 @@
 #include "pipeline.h"
 #include <iostream>
 
-Pipeline::Pipeline()
-{}
+Pipeline::Pipeline(unsigned long robSize, unsigned long IQSize, unsigned long width)
+{
+	registers[PipelineRegister::DE] =
+	    std::unique_ptr<RegisterBase>(new InOrderRegister(width));
+
+	registers[PipelineRegister::RN] =
+	    std::unique_ptr<RegisterBase>(new InOrderRegister(width));
+
+	registers[PipelineRegister::RR] =
+	    std::unique_ptr<RegisterBase>(new InOrderRegister(width));
+
+	registers[PipelineRegister::DI] =
+	    std::unique_ptr<RegisterBase>(new InOrderRegister(width));
+
+	registers[PipelineRegister::IQ] =
+	    std::unique_ptr<RegisterBase>(new InOrderRegister(IQSize));
+
+	registers[PipelineRegister::execute_list] =
+	    std::unique_ptr<RegisterBase>(new OutOfOrderRegister(width * 5));
+
+	registers[PipelineRegister::WB] =
+	    std::unique_ptr<RegisterBase>(new OutOfOrderRegister(width * 5));
+
+	// Should ROB be in order or out of order? Actually, this should be
+	// in order with respect to program order.
+	registers[PipelineRegister::ROB] =
+	    std::unique_ptr<RegisterBase>(new InOrderRegister(robSize));
+}
 
 void Pipeline::fetch()
 {}

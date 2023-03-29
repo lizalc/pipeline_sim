@@ -9,9 +9,9 @@
 #include <string>
 #include <vector>
 
-Simulator::Simulator(const int robSize, const int IQSize, const int width,
-                     const std::string &traceFile)
-    : robSize{robSize}, IQSize{IQSize}, width{width}, traceFile{traceFile}
+Simulator::Simulator(const unsigned long robSize, const unsigned long IQSize,
+                     const unsigned long width, const std::string &traceFile)
+    : pipeline{robSize, IQSize, width}, traceFile{traceFile}
 {}
 
 void Simulator::setup()
@@ -27,14 +27,15 @@ void Simulator::setup()
 	std::string line;
 	while (std::getline(trace, line)) {
 		std::istringstream values{line};
-		std::string discard;  // PC is discarded, not needed.
-		values >> discard;
+		std::string pc;
+		values >> pc;
 
 		int opType, destReg, srcReg1, srcReg2;
 		values >> opType >> destReg >> srcReg1 >> srcReg2;
 
-		instructions.emplace_back(
-		    Instruction(sequenceNum, opType, destReg, srcReg1, srcReg2));
+		instructions.emplace_back(Instruction(std::stoul(pc, nullptr, 16),
+		                                      sequenceNum, opType, destReg, srcReg1,
+		                                      srcReg2));
 		++sequenceNum;
 	}
 

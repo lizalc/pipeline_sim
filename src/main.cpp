@@ -13,8 +13,8 @@ int main(const int argc, const char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	Simulator simulator{std::stoi(argv[1]), std::stoi(argv[2]), std::stoi(argv[3]),
-	                    argv[4]};
+	Simulator simulator{std::stoul(argv[1]), std::stoul(argv[2]),
+	                    std::stoul(argv[3]), argv[4]};
 
 	simulator.setup();
 	// simulator.run();
