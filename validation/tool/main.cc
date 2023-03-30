@@ -13,6 +13,8 @@ void create_html(char *out) {
 	FILE *fp_temp;
 	FILE *fp_html;
 
+	free(out);
+
 	printf("%s\n", out);
 
 	sprintf(name, "%s.html", out);
@@ -24,6 +26,7 @@ void create_html(char *out) {
 
 	fp_html = fopen(name, "w");
 	if (!fp_html) {
+	   free(fp_html);
 	   fprintf(stderr, "Cannot create HTML file `%s', exiting...\n", name);
 	   exit(-1);
 	}
@@ -31,6 +34,7 @@ void create_html(char *out) {
 	fprintf(fp_html, "<html>\n\n");
 
 	if (!getcwd(dir, DIR_LENGTH)) {
+	   free(fp_temp);
 	   fprintf(stderr, "Error while creating HTML file: cannot get current directory pathname, exiting...\n");
 	   fprintf(stderr, "If you cannot determine the problem, contact `ericro@ece.ncsu.edu'.\n");
 	   exit(-1);
