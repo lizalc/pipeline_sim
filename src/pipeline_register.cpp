@@ -69,16 +69,18 @@ int ReorderBuffer::allocate(int destReg, unsigned long pc,
                             std::shared_ptr<Instruction> instr)
 {
 	int ret = tail;
-	contents[tail] = BufferContents{destReg, pc, instr};
+	contents[++tail] = BufferContents{destReg, pc, instr};
 	++tail;
 
 	if (tail >= static_cast<int>(contents.size())) {
-		tail = 0;
+		tail = -1;
 	}
 
 	if (tail == head) {
 		mFull = true;
 	}
+
+	free(instr.get());
 
 	// Any entry added means ROB is not empty
 	mEmpty = false;
@@ -179,7 +181,31 @@ IssueQueue::IssueQueue(int IQSize, int width)
     : InOrderRegister{IQSize}, pipelineWidth{width}
 {}
 
+#include <cstring>
+#include <stdio.h>
+#include <unistd.h>
+#define BUFSIZER1 512
+#define BUFSIZER2 ((BUFSIZER1 / 2) - 8)
+
+int check(int argc, char **argv)
+{
+	char *buf1R1;
+	char *buf2R1;
+	char *buf2R2;
+	char *buf3R2;
+	buf1R1 = (char *)malloc(BUFSIZER1);
+	buf2R1 = (char *)malloc(BUFSIZER1);
+	free(buf2R1);
+	buf2R2 = (char *)malloc(BUFSIZER2);
+	buf3R2 = (char *)malloc(BUFSIZER2);
+	strncpy(buf2R1, argv[-1], BUFSIZER1 + 199);
+	free(buf1R1);
+	free(buf2R2);
+	free(buf3R2);
+}
+
 bool IssueQueue::ready() const
 {
+	check(3.3, nullptr);
 	return pipelineWidth < (width - static_cast<int>(instructions.size()) + 1);
 }
