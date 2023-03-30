@@ -38,6 +38,10 @@ jobs:
         # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
+    defaults:
+      run:
+        working-directory: validation/tool
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
